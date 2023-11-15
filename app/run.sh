@@ -28,9 +28,9 @@ check_ip() {
   printf '%s' "$1" | tr -d '\n' | grep -Eq "$IP_REGEX"
 }
 
-if [ ! -f "/.dockerenv" ]; then
-  exiterr "This script ONLY runs in a Docker container."
-fi
+#if [ ! -f "/.dockerenv" ]; then
+#  exiterr "This script ONLY runs in a Docker container."
+#fi
 
 if ip link add dummy0 type dummy 2>&1 | grep -q "not permitted"; then
 cat 1>&2 <<'EOF'
@@ -177,6 +177,7 @@ Setup VPN clients: https://git.io/vpnclients
 
 EOF
 
+set -x
 #Create xl2tpd control file:
 mkdir -p /var/run/xl2tpd
 touch /var/run/xl2tpd/l2tp-control
@@ -188,7 +189,8 @@ service ipsec restart
 service xl2tpd restart
 
 #Start the IPsec connection:
-ipsec up myvpn
+sleep 10 # wait for myvpn
+ipsec up myvpn || exit 1
 
 
 #Start the L2TP connection:
